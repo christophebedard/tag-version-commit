@@ -1,4 +1,4 @@
-import {context} from '@actions/github'
+import {context} from '@actions/github';
 import nock from 'nock';
 import {run} from '../src/main';
 
@@ -23,7 +23,9 @@ describe('action', () => {
     await run();
 
     // Expect the regex exception message
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('Invalid regular expression'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid regular expression')
+    );
   });
 
   it('does not do anything when the commit message does not match the version regex', async () => {
@@ -50,7 +52,7 @@ describe('action', () => {
     process.env['INPUT_TOKEN'] = '12345';
     process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
     process.env['INPUT_VERSION_TAG_PREFIX'] = '';
-    
+
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
@@ -65,14 +67,16 @@ describe('action', () => {
     await run();
 
     expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.2.3'));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=commit::0123456789abcdef'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::0123456789abcdef')
+    );
   });
 
   it('creates a tag using the prefix when the commit message matches the version regex', async () => {
     process.env['INPUT_TOKEN'] = '12345';
     process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
     process.env['INPUT_VERSION_TAG_PREFIX'] = 'v';
-    
+
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
@@ -87,7 +91,9 @@ describe('action', () => {
     await run();
 
     expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::v1.2.3'));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=commit::0123456789abcdef'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::0123456789abcdef')
+    );
   });
 
   it('does not do any requests if dry_run is enabled', async () => {
@@ -107,6 +113,8 @@ describe('action', () => {
     await run();
 
     expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.2.3'));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=commit::0123456789abcdef'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::0123456789abcdef')
+    );
   });
 });
