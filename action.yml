@@ -4,8 +4,8 @@ outputs:
   tag:
     description: 'The tag that has been created, or an empty string'
 inputs:
-  github_token:
-    description: 'Required for permission to create a tag'
+  token:
+    description: 'GitHub token, required for permission to create a tag'
     required: true
   version_regex:
     description: 'The version regex to use for detecting version in commit messages'
