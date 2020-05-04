@@ -46,13 +46,11 @@ export async function run(): Promise<void> {
 
     if (!dry_run) {
       // Let the GitHub API return an error if it already exists
-      const tag_response = await octokit.git.createTag({
+      const tag_response = await octokit.git.createRef({
         owner: repo_owner,
         repo: repo_name,
-        tag: tag_name,
-        message: '',
-        object: commit_sha,
-        type: 'commit'
+        ref: `refs/tags/${tag_name}`,
+        sha: commit_sha
       });
       if (201 !== tag_response.status) {
         core.error('Failed to create tag');

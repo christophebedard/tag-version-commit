@@ -59,7 +59,7 @@ describe('action', () => {
         message: '1.2.3'
       });
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/tags')
+      .post('/repos/theowner/therepo/git/refs')
       .reply(201, {});
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
@@ -103,7 +103,7 @@ describe('action', () => {
         message: '1.2.3'
       });
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/tags')
+      .post('/repos/theowner/therepo/git/refs')
       .reply(201, {});
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
