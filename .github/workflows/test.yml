@@ -21,3 +21,4 @@ jobs:
     - uses: ./
       with: 
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        dry_run: true
