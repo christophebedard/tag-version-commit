@@ -3,8 +3,6 @@ import {context, GitHub} from '@actions/github';
 
 export async function run(): Promise<void> {
   try {
-    core.info('Running action/tag-version-commit');
-
     // Inputs
     const token = core.getInput('token');
     const version_regex = core.getInput('version_regex');
