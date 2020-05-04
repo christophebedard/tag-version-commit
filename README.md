@@ -1,3 +1,3 @@
 # tag-version-commit GitHub Action
 
-GitHub action for tagging commits whose message matches a version regex.
+GitHub action for tagging commits whose title matches a version regex.

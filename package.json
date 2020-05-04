@@ -2,7 +2,7 @@
   "name": "tag-version-commit",
   "version": "0.0.1",
   "private": true,
-  "description": "GitHub action for tagging commits whose message matches a version regex",
+  "description": "GitHub action for tagging commits whose title matches a version regex",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
