@@ -9,7 +9,8 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
-    "pack": "ncc build"
+    "pack": "ncc build",
+    "all": "npm run build && npm run format-check && npm run lint && npm run pack"
   },
   "repository": {
     "type": "git",
