@@ -2,7 +2,9 @@ name: 'Tag version commit'
 description: 'tagging commits whose title matches a version regex'
 outputs:
   tag:
-    description: 'The tag that has been created, or an empty string'
+    description: 'The tag that has been created'
+  commit:
+    description: 'The commit that was tagged'
 inputs:
   token:
     description: 'GitHub token, required for permission to create a tag'
