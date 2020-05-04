@@ -14,11 +14,14 @@ jobs:
     - run: |
         npm ci
         npm run all
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v1
-  #   - uses: ./
-  #     with:
-  #       token: ${{ secrets.GITHUB_TOKEN }}
-  #       dry_run: true
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: |
+        npm ci
+        npm run build
+    - uses: ./
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        dry_run: true
