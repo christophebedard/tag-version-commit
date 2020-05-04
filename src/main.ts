@@ -31,11 +31,11 @@ export async function run(): Promise<void> {
     }
 
     // Check if it matches the version regex
-    const commit_message = commit.data.message;
-    const version_regex_match = regex.test(commit_message);
+    const commit_title = commit.data.message.split('\n')[0];
+    const version_regex_match = regex.test(commit_title);
     if (!version_regex_match) {
       core.info(
-        `Commit message does not match version regex '${version_regex}': ${commit_message}`
+        `Commit title does not match version regex '${version_regex}': ${commit_title}`
       );
       core.setOutput('tag', '');
       core.setOutput('commit', '');
@@ -43,7 +43,7 @@ export async function run(): Promise<void> {
     }
 
     // Create tag
-    const tag_name = version_tag_prefix + commit_message;
+    const tag_name = version_tag_prefix + commit_title;
     core.debug(`Creating tag '${tag_name}' on commit ${commit_sha}`);
 
     if (!dry_run) {

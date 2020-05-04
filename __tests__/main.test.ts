@@ -28,7 +28,7 @@ describe('action', () => {
     );
   });
 
-  it('does not do anything when the commit message does not match the version regex', async () => {
+  it('does not do anything when the commit title does not match the version regex', async () => {
     process.env['INPUT_TOKEN'] = '12345';
     process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
     process.env['INPUT_VERSION_TAG_PREFIX'] = '';
@@ -48,7 +48,7 @@ describe('action', () => {
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
   });
 
-  it('creates a tag when the commit message matches the version regex', async () => {
+  it('creates a tag when the commit title matches the version regex', async () => {
     process.env['INPUT_TOKEN'] = '12345';
     process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
     process.env['INPUT_VERSION_TAG_PREFIX'] = '';
@@ -72,7 +72,27 @@ describe('action', () => {
     );
   });
 
-  it('creates a tag using the prefix when the commit message matches the version regex', async () => {
+  it('only checks the commit title and not the whole message', async () => {
+    process.env['INPUT_TOKEN'] = '12345';
+    process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
+    process.env['INPUT_VERSION_TAG_PREFIX'] = '';
+
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: 'the commit title with a version later in the message\n\n1.2.3'
+      });
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    // Outputs should be empty
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+  });
+
+  it('creates a tag using the prefix when the commit title matches the version regex', async () => {
     process.env['INPUT_TOKEN'] = '12345';
     process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
     process.env['INPUT_VERSION_TAG_PREFIX'] = 'v';
