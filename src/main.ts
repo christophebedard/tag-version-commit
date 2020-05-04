@@ -26,7 +26,7 @@ export async function run(): Promise<void> {
       commit_sha
     });
     if (200 !== commit.status) {
-      core.error('Failed to get commit data');
+      core.setFailed(`Failed to get commit data (status=${commit.status})`);
       return;
     }
 
@@ -53,7 +53,7 @@ export async function run(): Promise<void> {
         sha: commit_sha
       });
       if (201 !== tag_response.status) {
-        core.error('Failed to create tag');
+        core.setFailed(`Failed to create tag (status=${tag_response.status})`);
         return;
       }
     }
