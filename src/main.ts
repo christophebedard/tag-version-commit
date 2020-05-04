@@ -34,9 +34,7 @@ export async function run(): Promise<void> {
     const commit_title = commit.data.message.split('\n')[0];
     const version_regex_match = regex.test(commit_title);
     if (!version_regex_match) {
-      core.info(
-        `Commit title does not match version regex '${version_regex}': ${commit_title}`
-      );
+      core.info(`Commit title does not match version regex '${version_regex}': ${commit_title}`);
       core.setOutput('tag', '');
       core.setOutput('commit', '');
       return;
