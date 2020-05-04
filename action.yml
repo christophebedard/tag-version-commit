@@ -1,0 +1,28 @@
+name: 'Tag version commit'
+description: 'tagging commits whose message matches a version regex'
+outputs:
+  tag:
+    description: 'The tag that has been created, or an empty string'
+inputs:
+  github_token:
+    description: 'Required for permission to create a tag'
+    required: true
+  version_regex:
+    description: 'The version regex to use for detecting version in commit messages'
+    required: false
+    default: '[0-9]+.[0-9]+.[0-9]+'
+  version_tag_prefix:
+    description: 'A prefix to append to the detected version number'
+    required: false
+    default: ''
+  dry_run:
+    description: 'Do everything except actually create the tag'
+    required: false
+    default: false
+
+runs:
+  using: 'node12'
+  main: 'lib/main.js'
+branding:
+  icon: 'tag'
+  color: 'purple'

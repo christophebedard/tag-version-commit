@@ -1,0 +1,47 @@
+{
+  "name": "tag-version-commit",
+  "version": "0.0.1",
+  "private": true,
+  "description": "GitHub action for tagging commits whose message matches a version regex",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "lint": "eslint src/**/*.ts",
+    "pack": "ncc build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christophebedard/tag-version-commit.git"
+  },
+  "keywords": [
+    "github",
+    "actions",
+    "git",
+    "tag",
+    "version"
+  ],
+  "author": "Christophe Bedard",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/christophebedard/tag-version-commit/issues"
+  },
+  "homepage": "https://github.com/christophebedard/tag-version-commit#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/github": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.14",
+    "@typescript-eslint/parser": "^2.8.0",
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^5.16.0",
+    "eslint-plugin-github": "^2.0.0",
+    "eslint-plugin-jest": "^22.21.0",
+    "js-yaml": "^3.13.1",
+    "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.7.2"
+  }
+}
