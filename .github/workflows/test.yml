@@ -1,4 +1,4 @@
-name: 'build-test'
+name: 'test'
 on:
   pull_request:
   push:
@@ -7,14 +7,14 @@ on:
       - 'releases/*'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - run: |
         npm ci
         npm run all
-  test:
+  test-action:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
