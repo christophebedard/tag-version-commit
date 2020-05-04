@@ -23,9 +23,9 @@ export async function run(): Promise<void> {
     const commit = await octokit.git.getCommit({
       owner: repo_owner,
       repo: repo_name,
-      commit_sha: commit_sha
+      commit_sha
     });
-    if (200 != commit.status) {
+    if (200 !== commit.status) {
       core.error('Failed to get commit data');
       return;
     }
@@ -56,7 +56,7 @@ export async function run(): Promise<void> {
         object: commit_sha,
         type: 'commit'
       });
-      if (201 != tag_response.status) {
+      if (201 !== tag_response.status) {
         core.error('Failed to create tag');
         return;
       }
