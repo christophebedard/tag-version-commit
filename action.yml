@@ -3,6 +3,8 @@ description: 'tagging commits whose title matches a version regex'
 outputs:
   tag:
     description: 'The tag that has been created'
+  message:
+    description: 'The message of the tag that has been created, if annotated'
   commit:
     description: 'The commit that was tagged'
 inputs:
@@ -17,6 +19,10 @@ inputs:
     description: 'A prefix to prepend to the detected version number to create the tag (e.g. "v")'
     required: false
     default: ''
+  annotated:
+    description: 'Whether to create an annotated tag, using the commit body as the message'
+    required: false
+    default: false
   dry_run:
     description: 'Do everything except actually create the tag'
     required: false
