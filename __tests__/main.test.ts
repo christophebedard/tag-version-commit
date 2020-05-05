@@ -68,7 +68,7 @@ describe('action', () => {
         message: '1.2.3'
       });
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/refs')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.3', sha: '0123456789abcdef'})
       .reply(201, {});
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
@@ -90,7 +90,7 @@ describe('action', () => {
         message: '6.9.f'
       });
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/refs')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/6.9.f', sha: '0123456789abcdef'})
       .reply(201, {});
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
@@ -128,10 +128,15 @@ describe('action', () => {
         message: '1.2.5\n\nthis is the commit body which should be used as the tag message'
       });
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/tags')
+      .post('/repos/theowner/therepo/git/tags', {
+        tag: '1.2.5',
+        message: 'this is the commit body which should be used as the tag message',
+        object: '0123456789abcdef',
+        type: 'commit'
+      })
       .reply(201, {});
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/refs')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.5', sha: '0123456789abcdef'})
       .reply(201, {});
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
@@ -158,10 +163,15 @@ describe('action', () => {
         message: '9.3.2'
       });
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/tags')
+      .post('/repos/theowner/therepo/git/tags', {
+        tag: '9.3.2',
+        message: '',
+        object: '0123456789abcdef',
+        type: 'commit'
+      })
       .reply(201, {});
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/refs')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/9.3.2', sha: '0123456789abcdef'})
       .reply(201, {});
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
@@ -184,7 +194,7 @@ describe('action', () => {
         message: '1.3.4'
       });
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/refs')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/v1.3.4', sha: '0123456789abcdef'})
       .reply(201, {});
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
