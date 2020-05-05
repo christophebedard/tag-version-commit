@@ -149,6 +149,32 @@ describe('action', () => {
     );
   });
 
+  it('correctly handles creating an annotated tag with a commit that has no body', async () => {
+    process.env['INPUT_ANNOTATED'] = 'true';
+
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: '9.3.2'
+      });
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/tags')
+      .reply(201, {});
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/refs')
+      .reply(201, {});
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::9.3.2'));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::0123456789abcdef')
+    );
+  });
+
   it('creates a tag using the prefix when the commit title matches the version regex', async () => {
     process.env['INPUT_VERSION_TAG_PREFIX'] = 'v';
 
