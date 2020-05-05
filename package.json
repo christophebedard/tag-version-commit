@@ -1,6 +1,6 @@
 {
   "name": "tag-version-commit",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "GitHub action for tagging commits whose title matches a version regex",
   "main": "lib/main.js",
