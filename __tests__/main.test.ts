@@ -22,6 +22,14 @@ beforeEach(() => {
   context.sha = '0123456789abcdef';
 });
 
+afterEach(() => {
+  if (!nock.isDone()) {
+    nock.cleanAll();
+    // TODO find a better way to make the test fail
+    throw new Error('Not all nock interceptors were used!');
+  }
+});
+
 describe('action', () => {
   it('detects a bad version regex', async () => {
     process.env['INPUT_VERSION_REGEX'] = '[0-9';
