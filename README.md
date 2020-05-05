@@ -8,10 +8,12 @@ Some projects maintain a version number somewhere in a file, e.g. `__version__ =
 When maintainers want to bump the version, they update that number, commit the change, and tag that commit.
 This action automates the tag creation.
 
-When the commit that triggers a workflow has a title that matches a version regex (e.g. `1.2.3`), this action creates a tag (e.g. `1.2.3`) pointing to that commit.
+When the commit that triggers a workflow has a title that matches a version regex (e.g. `1.2.3`), this action creates a lightweight tag (e.g. `1.2.3`) pointing to that commit.
+It is also possible to create an annotated tag using the commit body as the message.
+See [inputs](#inputs) for more details.
 
 Currently, it does not support checking any commit other than the last commit that was pushed.
-It also does not make sure that the tag does not exist before creating it, in which case it will simply fail.
+It also does not make sure that the tag does not exist before creating it, in which case the API request will simply fail.
 
 ## Usage
 
@@ -53,13 +55,15 @@ jobs:
 |`token`|GitHub token, required for permission to create a tag|yes||
 |`version_regex`|the version regex to use for detecting version in commit messages|no|`'[0-9]+.[0-9]+.[0-9]+'`|
 |`version_tag_prefix`|a prefix to prepend to the detected version number to create the tag (e.g. "v")|no|`''`|
+|`annotated`|whether to create an annotated tag, using the commit body as the message|no|`false`|
 |`dry_run`|do everything except actually create the tag|no|`false`|
 
 ## Outputs
 
 |Name|Description|Default<sup>1</sup>|
 |:---|:----------|:-----:|
-|`tag`|the tag that has been created, if any|`''`|
-|`commit`|the commit that was tagged, if any|`''`|
+|`tag`|the tag that has been created|`''`|
+|`message`|the message of the annotated tag (if `annotated`) that has been created|`''`|
+|`commit`|the commit that was tagged|`''`|
 
 &nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp; if no tag has been created
