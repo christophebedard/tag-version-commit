@@ -2102,7 +2102,11 @@ function run() {
                     return;
                 }
             }
-            core.info(`Created tag '${tag_name}' on commit ${commit_sha}${annotated ? ` with message: '${tag_message}'` : ''}`);
+            core.info(`Created tag '${tag_name}' on commit ${commit_sha}${annotated
+                ? ` with ${tag_message.length === 0
+                    ? 'empty message'
+                    : `message:\n\t${tag_message.replace('\n', '\n\t')}`}`
+                : ''}`);
             core.setOutput('tag', tag_name);
             core.setOutput('message', tag_message);
             core.setOutput('commit', commit_sha);

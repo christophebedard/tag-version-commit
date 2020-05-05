@@ -89,7 +89,13 @@ export async function run(): Promise<void> {
 
     core.info(
       `Created tag '${tag_name}' on commit ${commit_sha}${
-        annotated ? ` with message: '${tag_message}'` : ''
+        annotated
+          ? ` with ${
+              tag_message.length === 0
+                ? 'empty message'
+                : `message:\n\t${tag_message.replace('\n', '\n\t')}`
+            }`
+          : ''
       }`
     );
     core.setOutput('tag', tag_name);
