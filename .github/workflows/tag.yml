@@ -1,0 +1,20 @@
+name: 'tag'
+on:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: |
+        npm ci
+        npm run build
+    - uses: ./
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        version_tag_prefix: 'v'
+        annotated: true
