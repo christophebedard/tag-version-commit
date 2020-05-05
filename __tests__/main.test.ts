@@ -81,11 +81,29 @@ describe('action', () => {
     );
   });
 
-  it('only checks the commit title and not the whole message', async () => {
-    process.env['INPUT_TOKEN'] = '12345';
-    process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
-    process.env['INPUT_VERSION_TAG_PREFIX'] = '';
+  it('works with a non-default version regex', async () => {
+    process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[a-z]+';
 
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: '6.9.f'
+      });
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/refs')
+      .reply(201, {});
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::6.9.f'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::0123456789abcdef')
+    );
+  });
+
+  it('only checks the commit title and not the whole message', async () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
