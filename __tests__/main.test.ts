@@ -107,7 +107,7 @@ describe('action', () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
-        message: 'the commit title with a version later in the message\n\n1.2.3'
+        message: 'the commit title with a version later in the message\n\n3.2.1'
       });
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
@@ -125,7 +125,7 @@ describe('action', () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
-        message: '2.3.1\n\nthis is the commit body which should be used as the tag message'
+        message: '1.2.5\n\nthis is the commit body which should be used as the tag message'
       });
     nock('https://api.github.com')
       .post('/repos/theowner/therepo/git/tags')
@@ -138,7 +138,7 @@ describe('action', () => {
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::2.3.1'));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.2.5'));
     expect(stdout_write).toHaveBeenCalledWith(
       expect.stringContaining(
         'name=message::this is the commit body which should be used as the tag message'
@@ -181,7 +181,7 @@ describe('action', () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
-        message: '1.2.3'
+        message: '1.3.4'
       });
     nock('https://api.github.com')
       .post('/repos/theowner/therepo/git/refs')
@@ -191,7 +191,7 @@ describe('action', () => {
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::v1.2.3'));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::v1.3.4'));
     expect(stdout_write).toHaveBeenCalledWith(
       expect.stringContaining('name=commit::0123456789abcdef')
     );
@@ -203,14 +203,14 @@ describe('action', () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
-        message: '1.2.3'
+        message: '5.2.1'
       });
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.2.3'));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::5.2.1'));
     expect(stdout_write).toHaveBeenCalledWith(
       expect.stringContaining('name=commit::0123456789abcdef')
     );
