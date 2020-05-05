@@ -5,6 +5,16 @@ import {run} from '../src/main';
 beforeEach(() => {
   jest.resetModules();
 
+  // Reset action inputs environment variables to their default value,
+  // otherwise an environment variable set in a test can creep into a later test
+  process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
+  process.env['INPUT_VERSION_TAG_PREFIX'] = '';
+  process.env['INPUT_ANNOTATED'] = 'false';
+  process.env['INPUT_DRY_RUN'] = 'false';
+  // Set token to simplify tests
+  process.env['INPUT_TOKEN'] = '12345';
+
+  // Set environment variables for context
   process.env['GITHUB_REPOSITORY'] = 'theowner/therepo';
   context.repo.owner = 'theowner';
   context.repo.repo = 'therepo';
@@ -14,7 +24,6 @@ beforeEach(() => {
 
 describe('action', () => {
   it('detects a bad version regex', async () => {
-    process.env['INPUT_TOKEN'] = '12345';
     process.env['INPUT_VERSION_REGEX'] = '[0-9';
     process.env['INPUT_VERSION_TAG_PREFIX'] = '';
 
@@ -29,10 +38,6 @@ describe('action', () => {
   });
 
   it('does not do anything when the commit title does not match the version regex', async () => {
-    process.env['INPUT_TOKEN'] = '12345';
-    process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
-    process.env['INPUT_VERSION_TAG_PREFIX'] = '';
-
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
@@ -49,10 +54,6 @@ describe('action', () => {
   });
 
   it('creates a tag when the commit title matches the version regex', async () => {
-    process.env['INPUT_TOKEN'] = '12345';
-    process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
-    process.env['INPUT_VERSION_TAG_PREFIX'] = '';
-
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
@@ -93,8 +94,6 @@ describe('action', () => {
   });
 
   it('creates a tag using the prefix when the commit title matches the version regex', async () => {
-    process.env['INPUT_TOKEN'] = '12345';
-    process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
     process.env['INPUT_VERSION_TAG_PREFIX'] = 'v';
 
     nock('https://api.github.com')
@@ -117,9 +116,6 @@ describe('action', () => {
   });
 
   it('does not do any requests if dry_run is enabled', async () => {
-    process.env['INPUT_TOKEN'] = '12345';
-    process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
-    process.env['INPUT_VERSION_TAG_PREFIX'] = '';
     process.env['INPUT_DRY_RUN'] = 'true';
 
     nock('https://api.github.com')
