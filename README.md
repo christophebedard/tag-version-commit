@@ -1,5 +1,7 @@
 # tag-version-commit GitHub Action
 
+[![GitHub Action](https://img.shields.io/badge/action-tag--version--commit-blue?logo=github)](https://github.com/marketplace/actions/tag-version-commit)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/christophebedard/tag-version-commit?color=blue)](https://github.com/christophebedard/tag-version-commit/releases)
 [![GitHub Workflow Status](https://github.com/christophebedard/tag-version-commit/workflows/test/badge.svg?branch=master)](https://github.com/christophebedard/tag-version-commit/actions)
 [![codecov](https://codecov.io/gh/christophebedard/tag-version-commit/branch/master/graph/badge.svg)](https://codecov.io/gh/christophebedard/tag-version-commit)
 
