@@ -55,18 +55,20 @@ jobs:
 
 |Name|Description|Required|Default|
 |:---|:----------|:------:|:-----:|
-|`token`|GitHub token, required for permission to create a tag|yes||
+|`token`<sup>1</sup>|GitHub token, required for permission to create a tag|yes||
 |`version_regex`|the version regex to use for detecting version in commit messages|no|`'[0-9]+.[0-9]+.[0-9]+'`|
 |`version_tag_prefix`|a prefix to prepend to the detected version number to create the tag (e.g. "v")|no|`''`|
 |`annotated`|whether to create an annotated tag, using the commit body as the message|no|`false`|
 |`dry_run`|do everything except actually create the tag|no|`false`|
 
+&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp; if you want the tag creation to trigger a workflow, create a [personal access token](https://github.com/settings/tokens), add it as a [secret](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets), and use it here instead of the provided `GITHUB_TOKEN`, which will not trigger any workflow
+
 ## Outputs
 
-|Name|Description|Default<sup>1</sup>|
+|Name|Description|Default<sup>2</sup>|
 |:---|:----------|:-----:|
 |`tag`|the tag that has been created|`''`|
 |`message`|the message of the annotated tag (if `annotated`) that has been created|`''`|
 |`commit`|the commit that was tagged|`''`|
 
-&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp; if no tag has been created
+&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp; if no tag has been created
