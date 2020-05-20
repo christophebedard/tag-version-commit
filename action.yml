@@ -14,7 +14,7 @@ inputs:
   version_regex:
     description: 'The version regex to use for detecting version in commit messages'
     required: false
-    default: '[0-9]+.[0-9]+.[0-9]+'
+    default: '^[0-9]+\.[0-9]+\.[0-9]+$'
   version_tag_prefix:
     description: 'A prefix to prepend to the detected version number to create the tag (e.g. "v")'
     required: false

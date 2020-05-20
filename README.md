@@ -56,7 +56,7 @@ jobs:
 |Name|Description|Required|Default|
 |:---|:----------|:------:|:-----:|
 |`token`<sup>1</sup>|GitHub token, required for permission to create a tag|yes||
-|`version_regex`|the version regex to use for detecting version in commit messages|no|`'[0-9]+.[0-9]+.[0-9]+'`|
+|`version_regex`|the version regex to use for detecting version in commit messages|no|`'^[0-9]+\.[0-9]+\.[0-9]+$'`|
 |`version_tag_prefix`|a prefix to prepend to the detected version number to create the tag (e.g. "v")|no|`''`|
 |`annotated`|whether to create an annotated tag, using the commit body as the message|no|`false`|
 |`dry_run`|do everything except actually create the tag|no|`false`|

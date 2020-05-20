@@ -7,7 +7,7 @@ beforeEach(() => {
 
   // Reset action inputs environment variables to their default value,
   // otherwise an environment variable set in a test can creep into a later test
-  process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[0-9]+';
+  process.env['INPUT_VERSION_REGEX'] = '^[0-9]+\\.[0-9]+\\.[0-9]+$';
   process.env['INPUT_VERSION_TAG_PREFIX'] = '';
   process.env['INPUT_ANNOTATED'] = 'false';
   process.env['INPUT_DRY_RUN'] = 'false';
@@ -45,11 +45,44 @@ describe('action', () => {
     );
   });
 
-  it('does not do anything when the commit title does not match the version regex', async () => {
+  it('does not do anything when the commit title does not match the version regex (1)', async () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
         message: 'this commit title will not match'
+      });
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    // Outputs should be empty
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+  });
+
+  it('works correctly with the default version regex: version in a sentence', async () => {
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: 'this commit title contains a 8.9.1 version'
+      });
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    // Outputs should be empty
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+  });
+
+  it('works correctly with the default version regex: version that could match a misformed regex', async () => {
+    // This would match if '.' was used instead of '\.' (or '\\.' to escape the backslash)
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: '8a7a6'
       });
 
     const stdout_write = jest.spyOn(process.stdout, 'write');
