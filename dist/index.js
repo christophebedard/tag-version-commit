@@ -2008,25 +2008,6 @@ function checkMode (stat, options) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2038,17 +2019,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
-const core = __importStar(__webpack_require__(470));
+const core_1 = __webpack_require__(470);
 const github_1 = __webpack_require__(469);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Inputs
-            const token = core.getInput('token');
-            const version_regex = core.getInput('version_regex');
-            const version_tag_prefix = core.getInput('version_tag_prefix');
-            const annotated = core.getInput('annotated') === 'true';
-            const dry_run = core.getInput('dry_run') === 'true';
+            const token = core_1.getInput('token');
+            const version_regex = core_1.getInput('version_regex');
+            const version_tag_prefix = core_1.getInput('version_tag_prefix');
+            const annotated = core_1.getInput('annotated') === 'true';
+            const dry_run = core_1.getInput('dry_run') === 'true';
             // Validate regex (will throw if invalid)
             const regex = new RegExp(version_regex);
             // Get data from context
@@ -2063,7 +2044,7 @@ function run() {
                 commit_sha
             });
             if (200 !== commit.status) {
-                core.setFailed(`Failed to get commit data (status=${commit.status})`);
+                core_1.setFailed(`Failed to get commit data (status=${commit.status})`);
                 return;
             }
             // Check if its title matches the version regex
@@ -2071,10 +2052,10 @@ function run() {
             const commit_title = commit_message[0];
             const version_regex_match = regex.test(commit_title);
             if (!version_regex_match) {
-                core.info(`Commit title does not match version regex '${version_regex}': '${commit_title}'`);
-                core.setOutput('tag', '');
-                core.setOutput('message', '');
-                core.setOutput('commit', '');
+                core_1.info(`Commit title does not match version regex '${version_regex}': '${commit_title}'`);
+                core_1.setOutput('tag', '');
+                core_1.setOutput('message', '');
+                core_1.setOutput('commit', '');
                 return;
             }
             let tag_message = '';
@@ -2086,7 +2067,7 @@ function run() {
             }
             // Create tag
             const tag_name = version_tag_prefix + commit_title;
-            core.debug(`Creating tag '${tag_name}' on commit ${commit_sha}${annotated ? ` with message: '${tag_message}'` : ''}`);
+            core_1.debug(`Creating tag '${tag_name}' on commit ${commit_sha}${annotated ? ` with message: '${tag_message}'` : ''}`);
             if (!dry_run) {
                 // Let the GitHub API return an error if they already exist
                 if (annotated) {
@@ -2099,7 +2080,7 @@ function run() {
                         type: 'commit'
                     });
                     if (201 !== tag_response.status) {
-                        core.setFailed(`Failed to create tag object (status=${tag_response.status})`);
+                        core_1.setFailed(`Failed to create tag object (status=${tag_response.status})`);
                         return;
                     }
                 }
@@ -2110,21 +2091,21 @@ function run() {
                     sha: commit_sha
                 });
                 if (201 !== ref_response.status) {
-                    core.setFailed(`Failed to create tag ref (status=${ref_response.status})`);
+                    core_1.setFailed(`Failed to create tag ref (status=${ref_response.status})`);
                     return;
                 }
             }
-            core.info(`Created tag '${tag_name}' on commit ${commit_sha}${annotated
+            core_1.info(`Created tag '${tag_name}' on commit ${commit_sha}${annotated
                 ? ` with ${tag_message.length === 0
                     ? 'empty message'
                     : `message:\n\t${tag_message.replace('\n', '\n\t')}`}`
                 : ''}`);
-            core.setOutput('tag', tag_name);
-            core.setOutput('message', tag_message);
-            core.setOutput('commit', commit_sha);
+            core_1.setOutput('tag', tag_name);
+            core_1.setOutput('message', tag_message);
+            core_1.setOutput('commit', commit_sha);
         }
         catch (error) {
-            core.setFailed(error.message);
+            core_1.setFailed(error.message);
         }
     });
 }
