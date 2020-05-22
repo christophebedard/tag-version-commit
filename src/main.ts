@@ -1,14 +1,14 @@
-import * as core from '@actions/core';
+import {getInput, setFailed, info, setOutput, debug} from '@actions/core';
 import {context, GitHub} from '@actions/github';
 
 export async function run(): Promise<void> {
   try {
     // Inputs
-    const token = core.getInput('token');
-    const version_regex = core.getInput('version_regex');
-    const version_tag_prefix = core.getInput('version_tag_prefix');
-    const annotated = core.getInput('annotated') === 'true';
-    const dry_run = core.getInput('dry_run') === 'true';
+    const token = getInput('token');
+    const version_regex = getInput('version_regex');
+    const version_tag_prefix = getInput('version_tag_prefix');
+    const annotated = getInput('annotated') === 'true';
+    const dry_run = getInput('dry_run') === 'true';
 
     // Validate regex (will throw if invalid)
     const regex = new RegExp(version_regex);
@@ -27,7 +27,7 @@ export async function run(): Promise<void> {
       commit_sha
     });
     if (200 !== commit.status) {
-      core.setFailed(`Failed to get commit data (status=${commit.status})`);
+      setFailed(`Failed to get commit data (status=${commit.status})`);
       return;
     }
 
@@ -36,10 +36,10 @@ export async function run(): Promise<void> {
     const commit_title = commit_message[0];
     const version_regex_match = regex.test(commit_title);
     if (!version_regex_match) {
-      core.info(`Commit title does not match version regex '${version_regex}': '${commit_title}'`);
-      core.setOutput('tag', '');
-      core.setOutput('message', '');
-      core.setOutput('commit', '');
+      info(`Commit title does not match version regex '${version_regex}': '${commit_title}'`);
+      setOutput('tag', '');
+      setOutput('message', '');
+      setOutput('commit', '');
       return;
     }
 
@@ -53,7 +53,7 @@ export async function run(): Promise<void> {
 
     // Create tag
     const tag_name = version_tag_prefix + commit_title;
-    core.debug(
+    debug(
       `Creating tag '${tag_name}' on commit ${commit_sha}${
         annotated ? ` with message: '${tag_message}'` : ''
       }`
@@ -71,7 +71,7 @@ export async function run(): Promise<void> {
           type: 'commit'
         });
         if (201 !== tag_response.status) {
-          core.setFailed(`Failed to create tag object (status=${tag_response.status})`);
+          setFailed(`Failed to create tag object (status=${tag_response.status})`);
           return;
         }
       }
@@ -82,12 +82,12 @@ export async function run(): Promise<void> {
         sha: commit_sha
       });
       if (201 !== ref_response.status) {
-        core.setFailed(`Failed to create tag ref (status=${ref_response.status})`);
+        setFailed(`Failed to create tag ref (status=${ref_response.status})`);
         return;
       }
     }
 
-    core.info(
+    info(
       `Created tag '${tag_name}' on commit ${commit_sha}${
         annotated
           ? ` with ${
@@ -98,11 +98,11 @@ export async function run(): Promise<void> {
           : ''
       }`
     );
-    core.setOutput('tag', tag_name);
-    core.setOutput('message', tag_message);
-    core.setOutput('commit', commit_sha);
+    setOutput('tag', tag_name);
+    setOutput('message', tag_message);
+    setOutput('commit', commit_sha);
   } catch (error) {
-    core.setFailed(error.message);
+    setFailed(error.message);
   }
 }
 
