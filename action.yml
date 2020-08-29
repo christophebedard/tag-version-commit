@@ -20,6 +20,12 @@ inputs:
       The version regex to use for detecting version in commit messages.
     required: false
     default: '^[0-9]+\.[0-9]+\.[0-9]+$'
+  version_assertion_command:
+    description: |
+      Command to run to validate the version, e.g. compare against a version file.
+      Use "$version" in the command and it will be replaced by the new version, without the prefix.
+    required: false
+    default: ''
   version_tag_prefix:
     description: |
       A prefix to prepend to the detected version number to create the tag (e.g. "v").

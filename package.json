@@ -33,6 +33,7 @@
   "homepage": "https://github.com/christophebedard/tag-version-commit#readme",
   "dependencies": {
     "@actions/core": "^1.2.5",
+    "@actions/exec": "^1.0.4",
     "@actions/github": "^2.2.0"
   },
   "devDependencies": {
