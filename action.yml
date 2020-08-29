@@ -2,29 +2,37 @@ name: 'Tag version commit'
 description: 'tag commits whose title matches a version regex'
 outputs:
   tag:
-    description: 'The tag that has been created'
+    description: |
+      The tag that has been created, or an empty string or not tag was created.
   message:
-    description: 'The message of the tag that has been created, if annotated'
+    description: |
+      The message of the tag that has been created, if annotated.
   commit:
-    description: 'The commit that was tagged'
+    description: |
+      The commit that was tagged, or an empty string or not tag was created.
 inputs:
   token:
-    description: 'GitHub token, required for permission to create a tag'
+    description: |
+      GitHub token, required for permission to create a tag.
     required: true
   version_regex:
-    description: 'The version regex to use for detecting version in commit messages'
+    description: |
+      The version regex to use for detecting version in commit messages.
     required: false
     default: '^[0-9]+\.[0-9]+\.[0-9]+$'
   version_tag_prefix:
-    description: 'A prefix to prepend to the detected version number to create the tag (e.g. "v")'
+    description: |
+      A prefix to prepend to the detected version number to create the tag (e.g. "v").
     required: false
     default: ''
   annotated:
-    description: 'Whether to create an annotated tag, using the commit body as the message'
+    description: |
+      Whether to create an annotated tag, using the commit body as the message.
     required: false
     default: false
   dry_run:
-    description: 'Do everything except actually create the tag'
+    description: |
+      Do everything except actually create the tag.
     required: false
     default: false
 
