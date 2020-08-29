@@ -1,4 +1,5 @@
 import {getInput, setFailed, info, setOutput, debug} from '@actions/core';
+import {exec} from '@actions/exec';
 import {context, GitHub} from '@actions/github';
 
 export async function run(): Promise<void> {
@@ -6,6 +7,7 @@ export async function run(): Promise<void> {
     // Inputs
     const token = getInput('token');
     const version_regex = getInput('version_regex');
+    const version_assertion_command = getInput('version_assertion_command');
     const version_tag_prefix = getInput('version_tag_prefix');
     const annotated = getInput('annotated') === 'true';
     const dry_run = getInput('dry_run') === 'true';
@@ -42,6 +44,21 @@ export async function run(): Promise<void> {
       setOutput('commit', '');
       return;
     }
+    const version = commit_title;
+
+    // Run version assertion command if one was provided
+    if (version_assertion_command.length > 0) {
+      const command_with_version = version_assertion_command.replace('$version', version);
+      debug(`Running version assertion command: ${command_with_version}`);
+      const return_code = await exec('bash', ['-c', command_with_version], {
+        ignoreReturnCode: true
+      });
+      debug(`Result of version assertion command: ${return_code}`);
+      if (return_code !== 0) {
+        setFailed(`Version assertion failed. Double check the version: ${version}`);
+        return;
+      }
+    }
 
     let tag_message = '';
     if (annotated) {
@@ -52,7 +69,7 @@ export async function run(): Promise<void> {
     }
 
     // Create tag
-    const tag_name = version_tag_prefix + commit_title;
+    const tag_name = version_tag_prefix + version;
     debug(
       `Creating tag '${tag_name}' on commit ${commit_sha}${
         annotated ? ` with message: '${tag_message}'` : ''

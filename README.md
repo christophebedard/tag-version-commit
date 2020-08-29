@@ -16,7 +16,7 @@ It is also possible to create an annotated tag using the commit body as the mess
 See [inputs](#inputs) for more details.
 
 Currently, it does not support checking any commit other than the last commit that was pushed.
-It also does not make sure that the tag does not exist before creating it, in which case the API request will simply fail.
+It also does not make sure that the tag does not exist before creating it, in which case the API request will simply fail and so will the action.
 
 ## Usage
 
@@ -45,10 +45,32 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: christophebedard/tag-version-commit@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Advanced
+
+Compare the new version against the one declared in a `package.json` file.
+
+```yaml
+name: 'tag'
+on:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: christophebedard/tag-version-commit@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        version_assertion_command: 'grep -q "\"version\": \"$version\"" package.json'
 ```
 
 ## Inputs
@@ -57,18 +79,21 @@ jobs:
 |:---|:----------|:------:|:-----:|
 |`token`<sup>1</sup>|GitHub token, required for permission to create a tag|yes||
 |`version_regex`|the version regex to use for detecting version in commit messages|no|`'^[0-9]+\.[0-9]+\.[0-9]+$'`|
+|`version_assertion_command`<sup>2</sup>|a command to run to validate the version, e.g. compare against a version file|no|`''`|
 |`version_tag_prefix`|a prefix to prepend to the detected version number to create the tag (e.g. "v")|no|`''`|
 |`annotated`|whether to create an annotated tag, using the commit body as the message|no|`false`|
 |`dry_run`|do everything except actually create the tag|no|`false`|
 
 &nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp; if you want the tag creation/push to trigger a workflow, create a [personal access token](https://github.com/settings/tokens) (with "repo" scope), add it as a [secret](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets), and use it here instead of the provided `GITHUB_TOKEN`, which will not trigger any workflow
 
+&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp; use `$version` in the command and it will be replaced by the new version, without the prefix
+
 ## Outputs
 
-|Name|Description|Default<sup>2</sup>|
+|Name|Description|Default<sup>1</sup>|
 |:---|:----------|:-----:|
 |`tag`|the tag that has been created|`''`|
 |`message`|the message of the annotated tag (if `annotated`) that has been created|`''`|
 |`commit`|the commit that was tagged|`''`|
 
-&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp; if no tag has been created
+&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp; if no tag has been created (unless `dry_run` is enabled)

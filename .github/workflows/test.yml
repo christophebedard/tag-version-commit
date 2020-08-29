@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - run: |
         npm ci
         npm run all
@@ -23,8 +23,9 @@ jobs:
   test-action:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: ./
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        version_assertion_command: 'grep -q "\"version\": \"$version\"" package.json'
         dry_run: true
