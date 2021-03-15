@@ -48,7 +48,7 @@ export async function run(): Promise<void> {
 
     // Run version assertion command if one was provided
     if (version_assertion_command.length > 0) {
-      const command_with_version = version_assertion_command.replace('$version', version);
+      const command_with_version = version_assertion_command.replace(/\$version/g, version);
       debug(`Running version assertion command: ${command_with_version}`);
       const return_code = await exec('bash', ['-c', command_with_version], {
         ignoreReturnCode: true
