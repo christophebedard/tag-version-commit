@@ -97,3 +97,7 @@ jobs:
 |`commit`|the commit that was tagged|`''`|
 
 &nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp; if no tag has been created (unless `dry_run` is enabled)
+
+## Contributing
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
