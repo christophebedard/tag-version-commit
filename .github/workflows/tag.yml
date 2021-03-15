@@ -13,6 +13,6 @@ jobs:
     - uses: ./
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        version_assertion_command: 'grep -q "\"version\": \"$version\"" package.json'
+        version_assertion_command: 'grep -q "\"version\": \"$version\"" package.json && grep -q "^  \"version\": \"$version\"" package-lock.json'
         version_tag_prefix: 'v'
         annotated: true
