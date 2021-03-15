@@ -175,8 +175,9 @@ describe('action', () => {
     );
   });
 
-  it('works if the version assertion command works, replacing $version with the version', async () => {
-    process.env['INPUT_VERSION_ASSERTION_COMMAND'] = '[ "$version" == "3.4.4" ]';
+  it('works if the version assertion command works, replacing all instances of $version with the version', async () => {
+    process.env['INPUT_VERSION_ASSERTION_COMMAND'] =
+      '[ "$version" == "3.4.4" ] && [ "$version" == "3.4.4" ]';
 
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
