@@ -1,6 +1,6 @@
 import {getInput, setFailed, info, setOutput, debug} from '@actions/core';
 import {exec} from '@actions/exec';
-import {context, GitHub} from '@actions/github';
+import {context, getOctokit} from '@actions/github';
 
 export async function run(): Promise<void> {
   try {
@@ -20,10 +20,10 @@ export async function run(): Promise<void> {
     const repo_name = context.repo.repo;
     const commit_sha = context.sha;
 
-    const octokit = new GitHub(token);
+    const octokit = getOctokit(token);
 
     // Get message of last commit
-    const commit = await octokit.git.getCommit({
+    const commit = await octokit.rest.git.getCommit({
       owner: repo_owner,
       repo: repo_name,
       commit_sha
@@ -79,7 +79,7 @@ export async function run(): Promise<void> {
     if (!dry_run) {
       // Let the GitHub API return an error if they already exist
       if (annotated) {
-        const tag_response = await octokit.git.createTag({
+        const tag_response = await octokit.rest.git.createTag({
           owner: repo_owner,
           repo: repo_name,
           tag: tag_name,
@@ -92,7 +92,7 @@ export async function run(): Promise<void> {
           return;
         }
       }
-      const ref_response = await octokit.git.createRef({
+      const ref_response = await octokit.rest.git.createRef({
         owner: repo_owner,
         repo: repo_name,
         ref: `refs/tags/${tag_name}`,
