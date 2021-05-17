@@ -20,103 +20,108 @@ exports.run = void 0;
 const core_1 = __nccwpck_require__(186);
 const exec_1 = __nccwpck_require__(514);
 const github_1 = __nccwpck_require__(438);
+function run_throws() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Inputs
+        const token = core_1.getInput('token');
+        const version_regex = core_1.getInput('version_regex');
+        const version_assertion_command = core_1.getInput('version_assertion_command');
+        const version_tag_prefix = core_1.getInput('version_tag_prefix');
+        const annotated = core_1.getInput('annotated') === 'true';
+        const dry_run = core_1.getInput('dry_run') === 'true';
+        // Validate regex (will throw if invalid)
+        const regex = new RegExp(version_regex);
+        // Get data from context
+        const repo_owner = github_1.context.repo.owner;
+        const repo_name = github_1.context.repo.repo;
+        const commit_sha = github_1.context.sha;
+        const octokit = github_1.getOctokit(token);
+        // Get message of last commit
+        const commit = yield octokit.rest.git.getCommit({
+            owner: repo_owner,
+            repo: repo_name,
+            commit_sha
+        });
+        if (200 !== commit.status) {
+            core_1.setFailed(`Failed to get commit data (status=${commit.status})`);
+            return;
+        }
+        // Check if its title matches the version regex
+        const commit_message = commit.data.message.split('\n');
+        const commit_title = commit_message[0];
+        const version_regex_match = regex.test(commit_title);
+        if (!version_regex_match) {
+            core_1.info(`Commit title does not match version regex '${version_regex}': '${commit_title}'`);
+            core_1.setOutput('tag', '');
+            core_1.setOutput('message', '');
+            core_1.setOutput('commit', '');
+            return;
+        }
+        const version = commit_title;
+        // Run version assertion command if one was provided
+        if (version_assertion_command.length > 0) {
+            const command_with_version = version_assertion_command.replace(/\$version/g, version);
+            core_1.debug(`Running version assertion command: ${command_with_version}`);
+            const return_code = yield exec_1.exec('bash', ['-c', command_with_version], {
+                ignoreReturnCode: true
+            });
+            core_1.debug(`Result of version assertion command: ${return_code}`);
+            if (return_code !== 0) {
+                core_1.setFailed(`Version assertion failed. Double check the version: ${version}`);
+                return;
+            }
+        }
+        let tag_message = '';
+        if (annotated) {
+            // Use the commit body, i.e. lines after the commit title while
+            // skipping the 2nd line of the commit message, since it should be
+            // an empty line separating the commit title and the commit body
+            tag_message = commit_message.slice(2).join('\n');
+        }
+        // Create tag
+        const tag_name = version_tag_prefix + version;
+        core_1.debug(`Creating tag '${tag_name}' on commit ${commit_sha}${annotated ? ` with message: '${tag_message}'` : ''}`);
+        if (!dry_run) {
+            // Let the GitHub API return an error if they already exist
+            if (annotated) {
+                const tag_response = yield octokit.rest.git.createTag({
+                    owner: repo_owner,
+                    repo: repo_name,
+                    tag: tag_name,
+                    message: tag_message,
+                    object: commit_sha,
+                    type: 'commit'
+                });
+                if (201 !== tag_response.status) {
+                    core_1.setFailed(`Failed to create tag object (status=${tag_response.status})`);
+                    return;
+                }
+            }
+            const ref_response = yield octokit.rest.git.createRef({
+                owner: repo_owner,
+                repo: repo_name,
+                ref: `refs/tags/${tag_name}`,
+                sha: commit_sha
+            });
+            if (201 !== ref_response.status) {
+                core_1.setFailed(`Failed to create tag ref (status=${ref_response.status})`);
+                return;
+            }
+        }
+        core_1.info(`Created tag '${tag_name}' on commit ${commit_sha}${annotated
+            ? ` with ${tag_message.length === 0
+                ? 'empty message'
+                : `message:\n\t${tag_message.replace('\n', '\n\t')}`}`
+            : ''}`);
+        core_1.setOutput('tag', tag_name);
+        core_1.setOutput('message', tag_message);
+        core_1.setOutput('commit', commit_sha);
+    });
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // Inputs
-            const token = core_1.getInput('token');
-            const version_regex = core_1.getInput('version_regex');
-            const version_assertion_command = core_1.getInput('version_assertion_command');
-            const version_tag_prefix = core_1.getInput('version_tag_prefix');
-            const annotated = core_1.getInput('annotated') === 'true';
-            const dry_run = core_1.getInput('dry_run') === 'true';
-            // Validate regex (will throw if invalid)
-            const regex = new RegExp(version_regex);
-            // Get data from context
-            const repo_owner = github_1.context.repo.owner;
-            const repo_name = github_1.context.repo.repo;
-            const commit_sha = github_1.context.sha;
-            const octokit = github_1.getOctokit(token);
-            // Get message of last commit
-            const commit = yield octokit.rest.git.getCommit({
-                owner: repo_owner,
-                repo: repo_name,
-                commit_sha
-            });
-            if (200 !== commit.status) {
-                core_1.setFailed(`Failed to get commit data (status=${commit.status})`);
-                return;
-            }
-            // Check if its title matches the version regex
-            const commit_message = commit.data.message.split('\n');
-            const commit_title = commit_message[0];
-            const version_regex_match = regex.test(commit_title);
-            if (!version_regex_match) {
-                core_1.info(`Commit title does not match version regex '${version_regex}': '${commit_title}'`);
-                core_1.setOutput('tag', '');
-                core_1.setOutput('message', '');
-                core_1.setOutput('commit', '');
-                return;
-            }
-            const version = commit_title;
-            // Run version assertion command if one was provided
-            if (version_assertion_command.length > 0) {
-                const command_with_version = version_assertion_command.replace(/\$version/g, version);
-                core_1.debug(`Running version assertion command: ${command_with_version}`);
-                const return_code = yield exec_1.exec('bash', ['-c', command_with_version], {
-                    ignoreReturnCode: true
-                });
-                core_1.debug(`Result of version assertion command: ${return_code}`);
-                if (return_code !== 0) {
-                    core_1.setFailed(`Version assertion failed. Double check the version: ${version}`);
-                    return;
-                }
-            }
-            let tag_message = '';
-            if (annotated) {
-                // Use the commit body, i.e. lines after the commit title while
-                // skipping the 2nd line of the commit message, since it should be
-                // an empty line separating the commit title and the commit body
-                tag_message = commit_message.slice(2).join('\n');
-            }
-            // Create tag
-            const tag_name = version_tag_prefix + version;
-            core_1.debug(`Creating tag '${tag_name}' on commit ${commit_sha}${annotated ? ` with message: '${tag_message}'` : ''}`);
-            if (!dry_run) {
-                // Let the GitHub API return an error if they already exist
-                if (annotated) {
-                    const tag_response = yield octokit.rest.git.createTag({
-                        owner: repo_owner,
-                        repo: repo_name,
-                        tag: tag_name,
-                        message: tag_message,
-                        object: commit_sha,
-                        type: 'commit'
-                    });
-                    if (201 !== tag_response.status) {
-                        core_1.setFailed(`Failed to create tag object (status=${tag_response.status})`);
-                        return;
-                    }
-                }
-                const ref_response = yield octokit.rest.git.createRef({
-                    owner: repo_owner,
-                    repo: repo_name,
-                    ref: `refs/tags/${tag_name}`,
-                    sha: commit_sha
-                });
-                if (201 !== ref_response.status) {
-                    core_1.setFailed(`Failed to create tag ref (status=${ref_response.status})`);
-                    return;
-                }
-            }
-            core_1.info(`Created tag '${tag_name}' on commit ${commit_sha}${annotated
-                ? ` with ${tag_message.length === 0
-                    ? 'empty message'
-                    : `message:\n\t${tag_message.replace('\n', '\n\t')}`}`
-                : ''}`);
-            core_1.setOutput('tag', tag_name);
-            core_1.setOutput('message', tag_message);
-            core_1.setOutput('commit', commit_sha);
+            yield run_throws();
         }
         catch (error) {
             core_1.setFailed(error.message);
