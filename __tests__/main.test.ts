@@ -119,7 +119,7 @@ describe('action', () => {
   });
 
   it('works with a non-default version regex', async () => {
-    process.env['INPUT_VERSION_REGEX'] = '[0-9]+.[0-9]+.[a-z]+';
+    process.env['INPUT_VERSION_REGEX'] = String.raw`[0-9]+\.[0-9]+\.[a-z]+`;
 
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
