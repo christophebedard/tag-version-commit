@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import {context} from '@actions/github';
 import nock from 'nock';
 import {run} from '../src/main';
@@ -36,11 +37,13 @@ describe('action', () => {
     process.env['INPUT_VERSION_REGEX'] = '[0-9';
     process.env['INPUT_VERSION_TAG_PREFIX'] = '';
 
+    const core_setFailed = jest.spyOn(core, 'setFailed');
     const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
     // Expect the regex exception message
+    expect(core_setFailed).toHaveBeenCalled();
     expect(stdout_write).toHaveBeenCalledWith(
       expect.stringContaining('Invalid regular expression')
     );
