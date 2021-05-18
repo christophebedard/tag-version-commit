@@ -7,6 +7,20 @@
 
 GitHub action for tagging commits whose title matches a version regex.
 
+1. [Overview](#Overview)
+1. [Usage](#Usage)
+   1. [Basic](#Basic)
+   1. [Typical](#Typical)
+   1. [Advanced](#Advanced)
+      1. [Use a capture group](#Use-a-capture-group)
+      1. [Compare matched version with content of file(s)](#Compare-matched-version-with-content-of-files)
+      1. [Use a version tag prefix](#Use-a-version-tag-prefix)
+1. [Inputs](#Inputs)
+1. [Outputs](#Outputs)
+1. [Contributing](#Contributing)
+
+## Overview
+
 Some projects maintain a version number somewhere in a file, e.g. `__version__ = '1.2.3'` for a Python project.
 When maintainers want to bump the version, they update that number, commit the change, and tag that commit.
 This action automates the tag creation.
