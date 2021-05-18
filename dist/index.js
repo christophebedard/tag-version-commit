@@ -49,7 +49,7 @@ function run_throws() {
         // Check if its title matches the version regex
         const commit_message = commit.data.message.split('\n');
         const commit_title = commit_message[0];
-        const version_regex_match = regex.test(commit_title);
+        const version_regex_match = regex.exec(commit_title);
         if (!version_regex_match) {
             core_1.info(`Commit title does not match version regex '${version_regex}': '${commit_title}'`);
             core_1.setOutput('tag', '');
@@ -57,7 +57,10 @@ function run_throws() {
             core_1.setOutput('commit', '');
             return;
         }
-        const version = commit_title;
+        // Without any capture group, there is only one element, but if there is a
+        // capture group, the captured group match will be the second/last element;
+        // if there are multiple capture groups, just use the last one for now
+        const version = version_regex_match[version_regex_match.length - 1];
         // Run version assertion command if one was provided
         if (version_assertion_command.length > 0) {
             const command_with_version = version_assertion_command.replace(/\$version/g, version);

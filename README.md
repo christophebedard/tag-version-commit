@@ -53,7 +53,33 @@ jobs:
 
 ### Advanced
 
+#### Use a capture group
+
+Use a capture group to allow including something other than the version itself in the commit title, e.g. `Version: 1.2.3`.
+This would create a `1.2.3` tag.
+
+```yaml
+name: 'tag'
+on:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: christophebedard/tag-version-commit@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        version_regex: 'Version: ([0-9]+\.[0-9]+\.[0-9]+)'
+```
+
+#### Compare matched version with content of file(s)
+
 Compare the new version against the one declared in a `package.json` file.
+The action will fail and no tag will be created if the assertion command fails.
 
 ```yaml
 name: 'tag'
@@ -73,20 +99,45 @@ jobs:
         version_assertion_command: 'grep -q "\"version\": \"$version\"" package.json'
 ```
 
+#### Use a version tag prefix
+
+Use a prefix for the version tag, e.g. `v`.
+This would create a `v1.2.3` tag for a commit titled `1.2.3`.
+
+```yaml
+name: 'tag'
+on:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: christophebedard/tag-version-commit@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        version_tag_prefix: 'v'
+```
+
 ## Inputs
 
 |Name|Description|Required|Default|
 |:---|:----------|:------:|:-----:|
 |`token`<sup>1</sup>|GitHub token, required for permission to create a tag|yes||
-|`version_regex`|the version regex to use for detecting version in commit messages|no|`'^[0-9]+\.[0-9]+\.[0-9]+$'`|
-|`version_assertion_command`<sup>2</sup>|a command to run to validate the version, e.g. compare against a version file|no|`''`|
+|`version_regex`|the version regex to use for detecting version in commit messages; can contain a capture group<sup>2</sup>|no|`'^[0-9]+\.[0-9]+\.[0-9]+$'`|
+|`version_assertion_command`<sup>3</sup>|a command to run to validate the version, e.g. compare against a version file|no|`''`|
 |`version_tag_prefix`|a prefix to prepend to the detected version number to create the tag (e.g. "v")|no|`''`|
 |`annotated`|whether to create an annotated tag, using the commit body as the message|no|`false`|
 |`dry_run`|do everything except actually create the tag|no|`false`|
 
 &nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp; if you want the tag creation/push to trigger an [`on.push.tags` workflow](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onpushpull_requestbranchestags), create a [personal access token](https://github.com/settings/tokens) (with "repo" scope), add it as a [secret](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets), and use it here instead of the provided `GITHUB_TOKEN`, which will not trigger an `on.push.tag` workflow
 
-&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp; use `$version` in the command and it will be replaced by the new version, without the prefix
+&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp; if there are multiple capture groups, only the captured match for the last group will be used
+
+&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp; use `$version` in the command and it will be replaced by the new version, without the prefix
 
 ## Outputs
 

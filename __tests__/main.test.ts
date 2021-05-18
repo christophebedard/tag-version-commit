@@ -49,7 +49,7 @@ describe('action', () => {
     );
   });
 
-  it('does not do anything when the commit title does not match the version regex (1)', async () => {
+  it('does not do anything when the commit title does not match the version regex', async () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
@@ -138,6 +138,68 @@ describe('action', () => {
     expect(stdout_write).toHaveBeenCalledWith(
       expect.stringContaining('name=commit::0123456789abcdef')
     );
+  });
+
+  it('works with a version regex with a capture group', async () => {
+    process.env['INPUT_VERSION_REGEX'] = String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)`;
+
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: 'Version: 6.9.z'
+      });
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/6.9.z', sha: '0123456789abcdef'})
+      .reply(201, {});
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::6.9.z'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::0123456789abcdef')
+    );
+  });
+
+  it('uses the last capture group match', async () => {
+    process.env['INPUT_VERSION_REGEX'] = String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)-([a-z]+)`;
+
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: 'Version: 6.9.g-alpha'
+      });
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/alpha', sha: '0123456789abcdef'})
+      .reply(201, {});
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::alpha'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::0123456789abcdef')
+    );
+  });
+
+  it('does not do anything when the commit title does not match the version regex with a capture group', async () => {
+    process.env['INPUT_VERSION_REGEX'] = String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)`;
+
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: 'Version 6.9.e'
+      });
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    // Outputs should be empty
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
   });
 
   it('only checks the commit title and not the whole message', async () => {
@@ -307,6 +369,29 @@ describe('action', () => {
     );
   });
 
+  it('creates a tag using the prefix when the commit title matches the version regex with a capture group', async () => {
+    process.env['INPUT_VERSION_REGEX'] = String.raw`Version: ([0-9]+\.[0-9]+\.[0-9]+)`;
+    process.env['INPUT_VERSION_TAG_PREFIX'] = 'v';
+
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: 'Version: 1.5.9'
+      });
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/v1.5.9', sha: '0123456789abcdef'})
+      .reply(201, {});
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::v1.5.9'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::0123456789abcdef')
+    );
+  });
+
   it('fails if the commit data request fails', async () => {
     // Using 204 as unexpected status code
     nock('https://api.github.com')
@@ -328,12 +413,12 @@ describe('action', () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
-        message: '1.2.3\n\nthis is the commit body which should be used as the tag message'
+        message: '1.2.4\n\nthis is the commit body which should be used as the tag message'
       });
     // Using 204 as unexpected status code
     nock('https://api.github.com')
       .post('/repos/theowner/therepo/git/tags', {
-        tag: '1.2.3',
+        tag: '1.2.4',
         message: 'this is the commit body which should be used as the tag message',
         object: '0123456789abcdef',
         type: 'commit'
@@ -355,11 +440,11 @@ describe('action', () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
-        message: '1.2.3'
+        message: '1.3.5'
       });
     // Using 204 as unexpected status code
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.3', sha: '0123456789abcdef'})
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.3.5', sha: '0123456789abcdef'})
       .reply(204, {});
 
     const core_setFailed = jest.spyOn(core, 'setFailed');
