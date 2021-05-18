@@ -307,6 +307,70 @@ describe('action', () => {
     );
   });
 
+  it('fails if the commit data request fails', async () => {
+    // Using 204 as unexpected status code
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(204, {});
+
+    const core_setFailed = jest.spyOn(core, 'setFailed');
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(core_setFailed).toHaveBeenCalled();
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('Failed to get commit data'));
+  });
+
+  it('fails if the tag object creation for annotated tag fails', async () => {
+    process.env['INPUT_ANNOTATED'] = 'true';
+
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: '1.2.3\n\nthis is the commit body which should be used as the tag message'
+      });
+    // Using 204 as unexpected status code
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/tags', {
+        tag: '1.2.3',
+        message: 'this is the commit body which should be used as the tag message',
+        object: '0123456789abcdef',
+        type: 'commit'
+      })
+      .reply(204, {});
+
+    const core_setFailed = jest.spyOn(core, 'setFailed');
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(core_setFailed).toHaveBeenCalled();
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create tag object')
+    );
+  });
+
+  it('fails if the ref creation fails', async () => {
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
+      .reply(200, {
+        message: '1.2.3'
+      });
+    // Using 204 as unexpected status code
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.3', sha: '0123456789abcdef'})
+      .reply(204, {});
+
+    const core_setFailed = jest.spyOn(core, 'setFailed');
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(core_setFailed).toHaveBeenCalled();
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('Failed to create tag ref'));
+  });
+
   it('does not do any requests if dry_run is enabled', async () => {
     process.env['INPUT_DRY_RUN'] = 'true';
 
