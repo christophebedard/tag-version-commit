@@ -328,12 +328,12 @@ describe('action', () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
-        message: '1.2.3\n\nthis is the commit body which should be used as the tag message'
+        message: '1.2.4\n\nthis is the commit body which should be used as the tag message'
       });
     // Using 204 as unexpected status code
     nock('https://api.github.com')
       .post('/repos/theowner/therepo/git/tags', {
-        tag: '1.2.3',
+        tag: '1.2.4',
         message: 'this is the commit body which should be used as the tag message',
         object: '0123456789abcdef',
         type: 'commit'
@@ -355,11 +355,11 @@ describe('action', () => {
     nock('https://api.github.com')
       .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
       .reply(200, {
-        message: '1.2.3'
+        message: '1.3.5'
       });
     // Using 204 as unexpected status code
     nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.3', sha: '0123456789abcdef'})
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.3.5', sha: '0123456789abcdef'})
       .reply(204, {});
 
     const core_setFailed = jest.spyOn(core, 'setFailed');
