@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import {context} from '@actions/github';
 import nock from 'nock';
 import {run} from '../src/main';
+import * as utils from '../src/utils';
 
 beforeEach(() => {
   jest.resetModules();
@@ -162,25 +163,35 @@ describe('action', () => {
     );
   });
 
-  it('uses the last capture group match', async () => {
+  it('fails if there is more than one capture group', async () => {
+    // 2 groups
     process.env['INPUT_VERSION_REGEX'] = String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)-([a-z]+)`;
 
-    nock('https://api.github.com')
-      .get('/repos/theowner/therepo/git/commits/0123456789abcdef')
-      .reply(200, {
-        message: 'Version: 6.9.g-alpha'
-      });
-    nock('https://api.github.com')
-      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/alpha', sha: '0123456789abcdef'})
-      .reply(201, {});
-
+    const core_setFailed = jest.spyOn(core, 'setFailed');
     const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::alpha'));
+    // Expect the regex exception message
+    expect(core_setFailed).toHaveBeenCalled();
     expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
+      expect.stringContaining('More than one capture group')
+    );
+
+    // 3 groups
+    process.env[
+      'INPUT_VERSION_REGEX'
+    ] = String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)-([a-z]+)-([0-9]+)`;
+
+    core_setFailed.mockClear();
+    stdout_write.mockClear();
+
+    await run();
+
+    // Expect the regex exception message
+    expect(core_setFailed).toHaveBeenCalled();
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('More than one capture group')
     );
   });
 
@@ -473,5 +484,19 @@ describe('action', () => {
     expect(stdout_write).toHaveBeenCalledWith(
       expect.stringContaining('name=commit::0123456789abcdef')
     );
+  });
+});
+
+describe('utils', () => {
+  it('correctly counts the number of capture groups in a regex', async () => {
+    expect(utils.count_capture_groups(new RegExp(''))).toBe(0);
+    expect(utils.count_capture_groups(/abc/)).toBe(0);
+    expect(utils.count_capture_groups(/^my s[o]+ cool regex$/)).toBe(0);
+    expect(utils.count_capture_groups(/^my (s[o]+) cool regex$/)).toBe(1);
+    expect(utils.count_capture_groups(/()/)).toBe(1);
+    expect(utils.count_capture_groups(/Version: ([0-9]+)/)).toBe(1);
+    expect(utils.count_capture_groups(/Version: ([0-9]+)-([a-z])/)).toBe(2);
+    expect(utils.count_capture_groups(/Version: ([0-9]+)-([a-z]+)-rc([0-9]+)/)).toBe(3);
+    expect(utils.count_capture_groups(/()()()()()/)).toBe(5);
   });
 });

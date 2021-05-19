@@ -1,6 +1,7 @@
 import {getInput, setFailed, info, setOutput, debug} from '@actions/core';
 import {exec} from '@actions/exec';
 import {context, getOctokit} from '@actions/github';
+import {count_capture_groups} from './utils';
 
 async function run_throws(): Promise<void> {
   // Inputs
@@ -13,6 +14,14 @@ async function run_throws(): Promise<void> {
 
   // Validate regex (will throw if invalid)
   const regex = new RegExp(version_regex);
+  debug(`Regex: ${regex.source}`);
+
+  // Make sure there is at most one capture group
+  const num_capture_groups = count_capture_groups(regex);
+  if (1 < num_capture_groups) {
+    setFailed(`More than one capture group: ${num_capture_groups} > 1`);
+    return;
+  }
 
   // Get data from context
   const repo_owner = context.repo.owner;

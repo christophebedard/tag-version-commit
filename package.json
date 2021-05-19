@@ -12,7 +12,7 @@
     "pack": "ncc build",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "all": "npm run build && npm run format-check && npm run lint && npm run pack && npm run test"
+    "all": "npm run build && npm run format-check && npm run lint && npm run pack && npm run test-coverage"
   },
   "repository": {
     "type": "git",

@@ -18,6 +18,7 @@ inputs:
   version_regex:
     description: |
       The version regex to use for detecting version in commit messages.
+      The regex has to contain either 0 or 1 capture group.
     required: false
     default: '^[0-9]+\.[0-9]+\.[0-9]+$'
   version_assertion_command:
@@ -35,12 +36,12 @@ inputs:
     description: |
       Whether to create an annotated tag, using the commit body as the message.
     required: false
-    default: false
+    default: 'false'
   dry_run:
     description: |
       Do everything except actually create the tag.
     required: false
-    default: false
+    default: 'false'
 
 runs:
   using: 'node12'
