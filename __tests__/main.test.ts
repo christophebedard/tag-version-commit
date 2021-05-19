@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import {context} from '@actions/github';
 import nock from 'nock';
 import {run} from '../src/main';
+import * as utils from '../src/utils';
 
 beforeEach(() => {
   jest.resetModules();
@@ -483,5 +484,19 @@ describe('action', () => {
     expect(stdout_write).toHaveBeenCalledWith(
       expect.stringContaining('name=commit::0123456789abcdef')
     );
+  });
+});
+
+describe('utils', () => {
+  it('correctly counts the number of capture groups in a regex', async () => {
+    expect(utils.count_capture_groups(new RegExp(''))).toBe(0);
+    expect(utils.count_capture_groups(/abc/)).toBe(0);
+    expect(utils.count_capture_groups(/^my s[o]+ cool regex$/)).toBe(0);
+    expect(utils.count_capture_groups(/^my (s[o]+) cool regex$/)).toBe(1);
+    expect(utils.count_capture_groups(/()/)).toBe(1);
+    expect(utils.count_capture_groups(/Version: ([0-9]+)/)).toBe(1);
+    expect(utils.count_capture_groups(/Version: ([0-9]+)-([a-z])/)).toBe(2);
+    expect(utils.count_capture_groups(/Version: ([0-9]+)-([a-z]+)-rc([0-9]+)/)).toBe(3);
+    expect(utils.count_capture_groups(/()()()()()/)).toBe(5);
   });
 });
