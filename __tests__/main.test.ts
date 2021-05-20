@@ -64,6 +64,7 @@ describe('action', () => {
 
     // Outputs should be empty
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
   });
 
@@ -80,6 +81,7 @@ describe('action', () => {
 
     // Outputs should be empty
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
   });
 
@@ -97,6 +99,7 @@ describe('action', () => {
 
     // Outputs should be empty
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
   });
 
@@ -211,6 +214,7 @@ describe('action', () => {
 
     // Outputs should be empty
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
   });
 
@@ -227,6 +231,7 @@ describe('action', () => {
 
     // Outputs should be empty
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
   });
 
@@ -284,13 +289,13 @@ describe('action', () => {
         message: '3.4.5'
       });
 
+    const core_setFailed = jest.spyOn(core, 'setFailed');
     const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('::error::Version assertion failed')
-    );
+    expect(core_setFailed).toHaveBeenCalled();
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('Version assertion failed'));
   });
 
   it('checks the entire commit message for a matching version if the option is enabled', async () => {
