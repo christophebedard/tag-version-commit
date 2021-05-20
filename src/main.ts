@@ -9,6 +9,7 @@ async function run_throws(): Promise<void> {
   const version_regex = getInput('version_regex');
   const version_assertion_command = getInput('version_assertion_command');
   const version_tag_prefix = getInput('version_tag_prefix');
+  const check_entire_commit_message = getInput('check_entire_commit_message') === 'true';
   const annotated = getInput('annotated') === 'true';
   const dry_run = getInput('dry_run') === 'true';
 
@@ -41,12 +42,20 @@ async function run_throws(): Promise<void> {
     return;
   }
 
-  // Check if its title matches the version regex
-  const commit_message = commit.data.message.split('\n');
-  const commit_title = commit_message[0];
-  const version_regex_match = regex.exec(commit_title);
+  // Check if the commit matches the version regex
+  const commit_message = commit.data.message;
+  const commit_message_array = commit_message.split('\n');
+  const commit_title = commit_message_array[0];
+  // Check either commit title or the whole commit message depending on the option
+  const commit_text_to_check = check_entire_commit_message ? commit_message : commit_title;
+  debug(`Checking commit text: ${commit_text_to_check}`);
+  const version_regex_match = regex.exec(commit_text_to_check);
   if (!version_regex_match) {
-    info(`Commit title does not match version regex '${version_regex}': '${commit_title}'`);
+    info(
+      `Commit ${
+        check_entire_commit_message ? 'message' : 'title'
+      } does not match version regex '${version_regex}': '${commit_text_to_check}'`
+    );
     setOutput('tag', '');
     setOutput('message', '');
     setOutput('commit', '');
@@ -76,7 +85,7 @@ async function run_throws(): Promise<void> {
     // Use the commit body, i.e. lines after the commit title while
     // skipping the 2nd line of the commit message, since it should be
     // an empty line separating the commit title and the commit body
-    tag_message = commit_message.slice(2).join('\n');
+    tag_message = commit_message_array.slice(2).join('\n');
   }
 
   // Create tag
