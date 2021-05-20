@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Christophe Bedard
+// See LICENSE file for details.
+
 /**
  * Count the number of capture groups in a regex.
  *

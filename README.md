@@ -19,6 +19,7 @@ GitHub action for tagging commits whose title matches a version regex.
 1. [Inputs](#Inputs)
 1. [Outputs](#Outputs)
 1. [Contributing](#Contributing)
+1. [License](#License)
 
 ## Overview
 
@@ -188,3 +189,7 @@ jobs:
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
+## License
+
+See [`LICENSE`](./LICENSE).

@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 Christophe Bedard
+// See LICENSE file for details.
+
 import {getInput, setFailed, info, setOutput, debug} from '@actions/core';
 import {exec} from '@actions/exec';
 import {context, getOctokit} from '@actions/github';
