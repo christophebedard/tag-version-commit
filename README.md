@@ -79,7 +79,6 @@ on:
   push:
     branches:
       - master
-      - 'releases/*'
 jobs:
   tag:
     runs-on: ubuntu-latest
@@ -102,7 +101,6 @@ on:
   push:
     branches:
       - master
-      - 'releases/*'
 jobs:
   tag:
     runs-on: ubuntu-latest
@@ -125,7 +123,6 @@ on:
   push:
     branches:
       - master
-      - 'releases/*'
 jobs:
   tag:
     runs-on: ubuntu-latest
@@ -184,7 +181,7 @@ jobs:
 |:---|:----------|:-----:|
 |`tag`|the tag that has been created|`''`|
 |`message`|the message of the annotated tag (if `annotated`) that has been created|`''`|
-|`commit`|the commit that was tagged|`''`|
+|`commit`|the commit hash that was tagged|`''`|
 
 &nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp; if no tag has been created (unless `dry_run` is enabled)
 
