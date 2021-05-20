@@ -6,6 +6,8 @@
 
 "use strict";
 
+// Copyright (c) 2020-2021 Christophe Bedard
+// See LICENSE file for details.
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -155,6 +157,8 @@ run();
 
 "use strict";
 
+// Copyright (c) 2021 Christophe Bedard
+// See LICENSE file for details.
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.count_capture_groups = void 0;
 /**

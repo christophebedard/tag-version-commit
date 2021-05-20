@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 Christophe Bedard
+// See LICENSE file for details.
+
 import * as core from '@actions/core';
 import {context} from '@actions/github';
 import nock from 'nock';
