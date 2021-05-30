@@ -13,8 +13,9 @@ beforeEach(() => {
   // Reset action inputs environment variables to their default value,
   // otherwise an environment variable set in a test can creep into a later test
   process.env['INPUT_VERSION_REGEX'] = '^[0-9]+\\.[0-9]+\\.[0-9]+$';
-  process.env['INPUT_VERSION_TAG_PREFIX'] = '';
   process.env['INPUT_VERSION_ASSERTION_COMMAND'] = '';
+  process.env['INPUT_VERSION_TAG_PREFIX'] = '';
+  process.env['INPUT_COMMIT'] = '';
   process.env['INPUT_CHECK_ENTIRE_COMMIT_MESSAGE'] = 'false';
   process.env['INPUT_ANNOTATED'] = 'false';
   process.env['INPUT_DRY_RUN'] = 'false';
@@ -236,6 +237,28 @@ describe('action', () => {
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
     expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+  });
+
+  it('uses the provided commit sha if there is one', async () => {
+    process.env['INPUT_COMMIT'] = 'zyx9876543210';
+
+    nock('https://api.github.com')
+      .get('/repos/theowner/therepo/git/commits/zyx9876543210')
+      .reply(200, {
+        message: '1.2.9'
+      });
+    nock('https://api.github.com')
+      .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.9', sha: 'zyx9876543210'})
+      .reply(201, {});
+
+    const stdout_write = jest.spyOn(process.stdout, 'write');
+
+    await run();
+
+    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.2.9'));
+    expect(stdout_write).toHaveBeenCalledWith(
+      expect.stringContaining('name=commit::zyx9876543210')
+    );
   });
 
   it('works if the version assertion command works', async () => {
