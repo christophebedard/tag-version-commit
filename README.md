@@ -166,6 +166,7 @@ jobs:
 |`version_regex`|the version regex to use for detecting version in commit messages; can contain either 0 or 1 capture group<sup>2</sup>|no|`'^[0-9]+\.[0-9]+\.[0-9]+$'`|
 |`version_assertion_command`<sup>3</sup>|a command to run to validate the version, e.g. compare against a version file|no|`''`|
 |`version_tag_prefix`|a prefix to prepend to the detected version number to create the tag (e.g. "v")|no|`''`|
+|`commit`|commit SHA to use, otherwise `HEAD` commit will be used|no|`''`|
 |`check_entire_commit_message`|whether to check the entire commit message, not just the title, for a matching version|no|`false`|
 |`annotated`|whether to create an annotated tag, using the commit body as the message|no|`false`|
 |`dry_run`|do everything except actually create the tag|no|`false`|

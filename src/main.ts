@@ -12,6 +12,7 @@ async function run_throws(): Promise<void> {
   const version_regex = getInput('version_regex');
   const version_assertion_command = getInput('version_assertion_command');
   const version_tag_prefix = getInput('version_tag_prefix');
+  const input_commit = getInput('commit');
   const check_entire_commit_message = getInput('check_entire_commit_message') === 'true';
   const annotated = getInput('annotated') === 'true';
   const dry_run = getInput('dry_run') === 'true';
@@ -30,7 +31,8 @@ async function run_throws(): Promise<void> {
   // Get data from context
   const repo_owner = context.repo.owner;
   const repo_name = context.repo.repo;
-  const commit_sha = context.sha;
+  let commit_sha = input_commit.length === 0 ? context.sha : input_commit;
+  debug(`Using commit: ${commit_sha}`);
 
   const octokit = getOctokit(token);
 

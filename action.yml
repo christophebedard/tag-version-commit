@@ -32,6 +32,12 @@ inputs:
       A prefix to prepend to the detected version number to create the tag (e.g. "v").
     required: false
     default: ''
+  commit:
+    description: |
+      Commit SHA to use for checking version.
+      HEAD commit will be used if the value is empty (default).
+    required: false
+    default: ''
   check_entire_commit_message:
     description: |
       Check the entire commit message, not just the title, for a matching version.
