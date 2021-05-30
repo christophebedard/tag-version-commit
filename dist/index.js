@@ -30,6 +30,7 @@ function run_throws() {
         const version_regex = core_1.getInput('version_regex');
         const version_assertion_command = core_1.getInput('version_assertion_command');
         const version_tag_prefix = core_1.getInput('version_tag_prefix');
+        const input_commit = core_1.getInput('commit');
         const check_entire_commit_message = core_1.getInput('check_entire_commit_message') === 'true';
         const annotated = core_1.getInput('annotated') === 'true';
         const dry_run = core_1.getInput('dry_run') === 'true';
@@ -45,7 +46,8 @@ function run_throws() {
         // Get data from context
         const repo_owner = github_1.context.repo.owner;
         const repo_name = github_1.context.repo.repo;
-        const commit_sha = github_1.context.sha;
+        const commit_sha = input_commit.length === 0 ? github_1.context.sha : input_commit;
+        core_1.debug(`Using commit: ${commit_sha}`);
         const octokit = github_1.getOctokit(token);
         // Get message of last commit
         const commit = yield octokit.rest.git.getCommit({

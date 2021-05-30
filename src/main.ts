@@ -31,7 +31,7 @@ async function run_throws(): Promise<void> {
   // Get data from context
   const repo_owner = context.repo.owner;
   const repo_name = context.repo.repo;
-  let commit_sha = input_commit.length === 0 ? context.sha : input_commit;
+  const commit_sha = input_commit.length === 0 ? context.sha : input_commit;
   debug(`Using commit: ${commit_sha}`);
 
   const octokit = getOctokit(token);
