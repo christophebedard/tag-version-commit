@@ -16,6 +16,7 @@ GitHub action for tagging commits whose title matches a version regex.
       1. [Compare matched version with content of file(s)](#Compare-matched-version-with-content-of-files)
       1. [Use a version tag prefix](#Use-a-version-tag-prefix)
       1. [Check entire commit message for matching version](#Check-entire-commit-message-for-matching-version)
+      1. [Check commit selected by another action](#Check-commit-selected-by-another-action)
 1. [Inputs](#Inputs)
 1. [Outputs](#Outputs)
 1. [Contributing](#Contributing)
@@ -158,6 +159,31 @@ jobs:
         check_entire_commit_message: true
 ```
 
+#### Check commit selected by another action
+
+Check a specific commit selected and output by another action.
+For example, if `some/get-commit-action` has a non-empty `commit` output, then that commit will be checked.
+
+```yaml
+name: 'tag'
+on:
+  push:
+    branches:
+      - master
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: some/get-commit-action@v1
+      id: some-get-commit-action
+    - uses: christophebedard/tag-version-commit@v1
+      if: ${{ steps.some-get-commit-action.outputs.commit != '' }}
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit: ${{ steps.some-get-commit-action.outputs.commit }}
+```
+
 ## Inputs
 
 |Name|Description|Required|Default|
@@ -166,6 +192,7 @@ jobs:
 |`version_regex`|the version regex to use for detecting version in commit messages; can contain either 0 or 1 capture group<sup>2</sup>|no|`'^[0-9]+\.[0-9]+\.[0-9]+$'`|
 |`version_assertion_command`<sup>3</sup>|a command to run to validate the version, e.g. compare against a version file|no|`''`|
 |`version_tag_prefix`|a prefix to prepend to the detected version number to create the tag (e.g. "v")|no|`''`|
+|`commit`|commit SHA to use, otherwise `HEAD` commit will be used|no|`''`|
 |`check_entire_commit_message`|whether to check the entire commit message, not just the title, for a matching version|no|`false`|
 |`annotated`|whether to create an annotated tag, using the commit body as the message|no|`false`|
 |`dry_run`|do everything except actually create the tag|no|`false`|
