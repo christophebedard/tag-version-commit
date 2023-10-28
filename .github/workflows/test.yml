@@ -10,20 +10,23 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v3
+      with:
+        node-version: "16.x"
     - run: |
         npm ci
         npm run all
     - run: |
         npm run test-coverage
     - name: Upload coverage data
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
         fail_ci_if_error: true
   test-action:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: ./
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
