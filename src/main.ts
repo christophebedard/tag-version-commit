@@ -149,7 +149,11 @@ export async function run(): Promise<void> {
   try {
     await run_throws();
   } catch (error) {
-    setFailed(error.message);
+    let errorMessage = "Unknown error";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    setFailed(errorMessage);
   }
 }
 
