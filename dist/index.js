@@ -144,7 +144,7 @@ function run() {
             yield run_throws();
         }
         catch (error) {
-            let errorMessage = "Unknown error";
+            let errorMessage = 'Unknown error';
             if (error instanceof Error) {
                 errorMessage = error.message;
             }
