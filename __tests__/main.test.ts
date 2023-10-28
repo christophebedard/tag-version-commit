@@ -44,14 +44,12 @@ describe('action', () => {
     process.env['INPUT_VERSION_TAG_PREFIX'] = '';
 
     const core_setFailed = jest.spyOn(core, 'setFailed');
-    const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
     // Expect the regex exception message
-    expect(core_setFailed).toHaveBeenCalled();
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid regular expression')
+    expect(core_setFailed).toHaveBeenCalledWith(
+      expect.stringMatching(/^Invalid regular expression/)
     );
   });
 
@@ -62,14 +60,14 @@ describe('action', () => {
         message: 'this commit title will not match'
       });
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
     // Outputs should be empty
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '');
+    expect(core_setOutput).toHaveBeenCalledWith('message', '');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '');
   });
 
   it('works correctly with the default version regex: version in a sentence', async () => {
@@ -79,14 +77,14 @@ describe('action', () => {
         message: 'this commit title contains a 8.9.1 version'
       });
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
     // Outputs should be empty
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '');
+    expect(core_setOutput).toHaveBeenCalledWith('message', '');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '');
   });
 
   it('works correctly with the default version regex: version that could match a misformed regex', async () => {
@@ -97,14 +95,14 @@ describe('action', () => {
         message: '8a7a6'
       });
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
     // Outputs should be empty
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '');
+    expect(core_setOutput).toHaveBeenCalledWith('message', '');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '');
   });
 
   it('creates a tag when the commit title matches the version regex', async () => {
@@ -117,14 +115,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.3', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.2.3'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '1.2.3');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('works with a non-default version regex', async () => {
@@ -139,14 +135,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/6.9.f', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::6.9.f'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '6.9.f');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('works with a version regex with a capture group', async () => {
@@ -161,14 +155,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/6.9.z', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::6.9.z'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '6.9.z');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('fails if there is more than one capture group', async () => {
@@ -176,14 +168,12 @@ describe('action', () => {
     process.env['INPUT_VERSION_REGEX'] = String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)-([a-z]+)`;
 
     const core_setFailed = jest.spyOn(core, 'setFailed');
-    const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
     // Expect the regex exception message
-    expect(core_setFailed).toHaveBeenCalled();
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('More than one capture group')
+    expect(core_setFailed).toHaveBeenCalledWith(
+      expect.stringMatching(/^More than one capture group/)
     );
 
     // 3 groups
@@ -192,14 +182,12 @@ describe('action', () => {
     ] = String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)-([a-z]+)-([0-9]+)`;
 
     core_setFailed.mockClear();
-    stdout_write.mockClear();
 
     await run();
 
     // Expect the regex exception message
-    expect(core_setFailed).toHaveBeenCalled();
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('More than one capture group')
+    expect(core_setFailed).toHaveBeenCalledWith(
+      expect.stringMatching(/^More than one capture group/)
     );
   });
 
@@ -212,14 +200,14 @@ describe('action', () => {
         message: 'Version 6.9.e'
       });
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
     // Outputs should be empty
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '');
+    expect(core_setOutput).toHaveBeenCalledWith('message', '');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '');
   });
 
   it('only checks the commit title and not the whole message', async () => {
@@ -229,14 +217,14 @@ describe('action', () => {
         message: 'the commit title with a version later in the message\n\n3.2.1'
       });
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
     // Outputs should be empty
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '');
+    expect(core_setOutput).toHaveBeenCalledWith('message', '');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '');
   });
 
   it('uses the provided commit sha if there is one', async () => {
@@ -251,14 +239,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.9', sha: 'zyx9876543210'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.2.9'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::zyx9876543210')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '1.2.9');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', 'zyx9876543210');
   });
 
   it('works if the version assertion command works', async () => {
@@ -273,14 +259,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/3.4.3', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::3.4.3'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '3.4.3');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('works if the version assertion command works, replacing all instances of $version with the version', async () => {
@@ -296,14 +280,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/3.4.4', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::3.4.4'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '3.4.4');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('fails if the version assertion command fails', async () => {
@@ -316,12 +298,10 @@ describe('action', () => {
       });
 
     const core_setFailed = jest.spyOn(core, 'setFailed');
-    const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
-    expect(core_setFailed).toHaveBeenCalled();
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('Version assertion failed'));
+    expect(core_setFailed).toHaveBeenCalledWith(expect.stringMatching(/^Version assertion failed/));
   });
 
   it('checks the entire commit message for a matching version if the option is enabled', async () => {
@@ -337,14 +317,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.5.2', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.5.2'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '1.5.2');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('does not check the entire commit message for a matching version if the option is disabled', async () => {
@@ -357,14 +335,14 @@ describe('action', () => {
         message: 'Tag new version\n\nVersion: 1.5.3\nsome more commit body text'
       });
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
     // Outputs should be empty
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '');
+    expect(core_setOutput).toHaveBeenCalledWith('message', '');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '');
   });
 
   it('does not do anything if there is no match when the option for checking entire commit message is enabled', async () => {
@@ -377,14 +355,14 @@ describe('action', () => {
         message: 'Some commit title\n\nBlah blah\nsome more commit body text'
       });
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
     // Outputs should be empty
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=tag::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=commit::[\n]*$/));
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '');
+    expect(core_setOutput).toHaveBeenCalledWith('message', '');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '');
   });
 
   it('creates an annotated tag if the option is enabled', async () => {
@@ -407,19 +385,16 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/1.2.5', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::1.2.5'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'name=message::this is the commit body which should be used as the tag message'
-      )
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '1.2.5');
+    expect(core_setOutput).toHaveBeenCalledWith(
+      'message',
+      'this is the commit body which should be used as the tag message'
     );
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('correctly handles creating an annotated tag with a commit that has no body', async () => {
@@ -442,15 +417,13 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/9.3.2', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::9.3.2'));
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringMatching(/^.*name=message::[\n]*$/));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '9.3.2');
+    expect(core_setOutput).toHaveBeenCalledWith('message', '');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('creates a tag using the prefix when the commit title matches the version regex', async () => {
@@ -465,14 +438,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/v1.3.4', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::v1.3.4'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', 'v1.3.4');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('creates a tag using the prefix when the commit title matches the version regex with a capture group', async () => {
@@ -488,14 +459,12 @@ describe('action', () => {
       .post('/repos/theowner/therepo/git/refs', {ref: 'refs/tags/v1.5.9', sha: '0123456789abcdef'})
       .reply(201, {});
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::v1.5.9'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', 'v1.5.9');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 
   it('fails if the commit data request fails', async () => {
@@ -505,12 +474,12 @@ describe('action', () => {
       .reply(204, {});
 
     const core_setFailed = jest.spyOn(core, 'setFailed');
-    const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
-    expect(core_setFailed).toHaveBeenCalled();
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('Failed to get commit data'));
+    expect(core_setFailed).toHaveBeenCalledWith(
+      expect.stringMatching(/^Failed to get commit data/)
+    );
   });
 
   it('fails if the tag object creation for annotated tag fails', async () => {
@@ -532,13 +501,11 @@ describe('action', () => {
       .reply(204, {});
 
     const core_setFailed = jest.spyOn(core, 'setFailed');
-    const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
-    expect(core_setFailed).toHaveBeenCalled();
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to create tag object')
+    expect(core_setFailed).toHaveBeenCalledWith(
+      expect.stringMatching(/^Failed to create tag object/)
     );
   });
 
@@ -554,12 +521,10 @@ describe('action', () => {
       .reply(204, {});
 
     const core_setFailed = jest.spyOn(core, 'setFailed');
-    const stdout_write = jest.spyOn(process.stdout, 'write');
 
     await run();
 
-    expect(core_setFailed).toHaveBeenCalled();
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('Failed to create tag ref'));
+    expect(core_setFailed).toHaveBeenCalledWith(expect.stringMatching(/^Failed to create tag ref/));
   });
 
   it('does not do any requests if dry_run is enabled', async () => {
@@ -571,14 +536,12 @@ describe('action', () => {
         message: '5.2.1'
       });
 
-    const stdout_write = jest.spyOn(process.stdout, 'write');
+    const core_setOutput = jest.spyOn(core, 'setOutput');
 
     await run();
 
-    expect(stdout_write).toHaveBeenCalledWith(expect.stringContaining('name=tag::5.2.1'));
-    expect(stdout_write).toHaveBeenCalledWith(
-      expect.stringContaining('name=commit::0123456789abcdef')
-    );
+    expect(core_setOutput).toHaveBeenCalledWith('tag', '5.2.1');
+    expect(core_setOutput).toHaveBeenCalledWith('commit', '0123456789abcdef');
   });
 });
 
