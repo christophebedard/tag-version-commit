@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
-        node-version: "16.x"
+        node-version: "24.x"
     - run: |
         npm ci
         npm run all
@@ -22,7 +22,7 @@ jobs:
     - name: Upload coverage data
       uses: codecov/codecov-action@v3
       with:
-        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
   test-action:
     runs-on: ubuntu-latest
     steps:

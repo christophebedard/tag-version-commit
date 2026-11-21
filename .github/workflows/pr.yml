@@ -6,9 +6,9 @@ jobs:
     name: "Lint sources and check build artifacts"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: "16.x"
+          node-version: "24.x"
       - run: npm ci && npm run lint && npm run format-check
       - run: npm run build && npm run pack && git diff --exit-code
