@@ -1,11 +1,25 @@
 // Copyright (c) 2020-2021 Christophe Bedard
 // See LICENSE file for details.
 
-import * as core from '@actions/core';
-import {context} from '@actions/github';
+import {jest} from '@jest/globals';
 import nock from 'nock';
-import {run} from '../src/main';
-import * as utils from '../src/utils';
+
+const core = {
+  getInput: jest.fn((name: string) => {
+    const inputName = `INPUT_${name.replace(/ /g, '_').toUpperCase()}`;
+    return process.env[inputName]?.trim() ?? '';
+  }),
+  setFailed: jest.fn(),
+  info: jest.fn(),
+  setOutput: jest.fn(),
+  debug: jest.fn()
+};
+
+jest.unstable_mockModule('@actions/core', () => core);
+
+const {context} = await import('@actions/github');
+const {run} = await import('../src/main');
+const utils = await import('../src/utils');
 
 beforeEach(() => {
   jest.resetModules();
@@ -177,9 +191,8 @@ describe('action', () => {
     );
 
     // 3 groups
-    process.env[
-      'INPUT_VERSION_REGEX'
-    ] = String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)-([a-z]+)-([0-9]+)`;
+    process.env['INPUT_VERSION_REGEX'] =
+      String.raw`Version: ([0-9]+\.[0-9]+\.[a-z]+)-([a-z]+)-([0-9]+)`;
 
     core_setFailed.mockClear();
 
